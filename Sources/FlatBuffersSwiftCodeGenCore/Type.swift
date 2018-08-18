@@ -230,26 +230,57 @@ extension Type: ASTNode {
         if let p2 = eat("byte", from: p1, length: length) {
             return (Type(scalar: .i8, vector: false, ref: nil, string: false), p2)
         }
+        if let p2 = eat("int8", from: p1, length: length) {
+            return (Type(scalar: .i8, vector: false, ref: nil, string: false), p2)
+        }
         if let p2 = eat("ubyte", from: p1, length: length) {
+            return (Type(scalar: .u8, vector: false, ref: nil, string: false), p2)
+        }
+        if let p2 = eat("uint8", from: p1, length: length) {
             return (Type(scalar: .u8, vector: false, ref: nil, string: false), p2)
         }
         if let p2 = eat("short", from: p1, length: length) {
             return (Type(scalar: .i16, vector: false, ref: nil, string: false), p2)
         }
+        if let p2 = eat("int16", from: p1, length: length) {
+            return (Type(scalar: .i16, vector: false, ref: nil, string: false), p2)
+        }
         if let p2 = eat("ushort", from: p1, length: length) {
             return (Type(scalar: .u16, vector: false, ref: nil, string: false), p2)
         }
-        if let p2 = eat("int", from: p1, length: length) {
+        if let p2 = eat("uint16", from: p1, length: length) {
+            return (Type(scalar: .u16, vector: false, ref: nil, string: false), p2)
+        }
+        if let p2 = eat("int32", from: p1, length: length) {
             return (Type(scalar: .i32, vector: false, ref: nil, string: false), p2)
         }
-        if let p2 = eat("uint", from: p1, length: length) {
+        if let p2 = eat("uint32", from: p1, length: length) {
             return (Type(scalar: .u32, vector: false, ref: nil, string: false), p2)
         }
         if let p2 = eat("long", from: p1, length: length) {
             return (Type(scalar: .i64, vector: false, ref: nil, string: false), p2)
         }
+        if let p2 = eat("int64", from: p1, length: length) {
+            return (Type(scalar: .i64, vector: false, ref: nil, string: false), p2)
+        }
         if let p2 = eat("ulong", from: p1, length: length) {
             return (Type(scalar: .u64, vector: false, ref: nil, string: false), p2)
+        }
+        if let p2 = eat("uint64", from: p1, length: length) {
+            return (Type(scalar: .u64, vector: false, ref: nil, string: false), p2)
+        }
+        if let p2 = eat("float32", from: p1, length: length) {
+            return (Type(scalar: .f32, vector: false, ref: nil, string: false), p2)
+        }
+        if let p2 = eat("float64", from: p1, length: length) {
+            return (Type(scalar: .f64, vector: false, ref: nil, string: false), p2)
+        }
+
+        if let p2 = eat("uint", from: p1, length: length) {
+            return (Type(scalar: .u32, vector: false, ref: nil, string: false), p2)
+        }
+        if let p2 = eat("int", from: p1, length: length) {
+            return (Type(scalar: .i32, vector: false, ref: nil, string: false), p2)
         }
         if let p2 = eat("float", from: p1, length: length) {
             return (Type(scalar: .f32, vector: false, ref: nil, string: false), p2)

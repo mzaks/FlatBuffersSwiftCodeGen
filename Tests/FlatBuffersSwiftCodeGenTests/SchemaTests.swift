@@ -624,7 +624,7 @@ fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
 """
         
         let schema = Schema.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
-        let result = schema?.0.swift
+        let result = schema?.0.swift()
         print(result!)
         XCTAssertEqual(expected, result!)
     }
