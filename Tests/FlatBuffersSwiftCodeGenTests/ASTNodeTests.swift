@@ -43,5 +43,10 @@ foo
         XCTAssertNotNil(result)
         XCTAssertEqual(s.utf8CodeUnitCount, s.utf8Start.distance(to: result!))
     }
-}
 
+    static var allTests = [
+        ("testEmptyString", testEmptyString),
+        ("testEatWhiteSpaceTillString", testEatWhiteSpaceTillString),
+        ("testEatString", testEatString)
+    ]
+}

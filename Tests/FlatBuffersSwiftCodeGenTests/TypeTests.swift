@@ -284,5 +284,11 @@ bool byte ubyte short ushort int uint long ulong float double string Foo [bool] 
         let result = types.map { $0.swift }.joined(separator: " ")
         XCTAssertEqual(result, swiftTypes)
     }
-}
 
+    static var allTests = [
+        ("testMultipleTypes", testMultipleTypes),
+        ("testBrokenDef", testBrokenDef),
+        ("testStrangeVector", testStrangeVector),
+        ("testMultipleTypesToSwift", testMultipleTypesToSwift),
+    ]
+}

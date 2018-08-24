@@ -26,4 +26,8 @@ class MetaDataTests: XCTestCase {
         XCTAssertEqual(result?.0.values[2].0.value, "meta")
         XCTAssertEqual(result?.0.values[2].1?.value, "\"hi\"")
     }
+
+    static var allTests = [
+        ("testReadMetaData", testReadMetaData),
+    ]
 }

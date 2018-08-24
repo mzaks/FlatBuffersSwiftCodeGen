@@ -135,4 +135,9 @@ public enum Foo2 {
         print(result!)
         XCTAssertEqual(result, expected)
     }
+
+    static var allTests = [
+        ("testUnion", testUnion),
+        ("testGen", testGen),
+    ]
 }

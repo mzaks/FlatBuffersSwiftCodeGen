@@ -328,4 +328,21 @@ public struct Foo: Scalar {
         XCTAssertEqual(names[7].0, "i")
         XCTAssertEqual(names[7].1, 5)
     }
+
+    static var allTests = [
+        ("testTable", testTable),
+        ("testWithCommentsTable", testWithCommentsTable),
+        ("testTableWithMeta", testTableWithMeta),
+        ("testStructIsNotTable", testStructIsNotTable),
+        ("testSwiftStruct", testSwiftStruct),
+        ("testTableIsNotStruct", testTableIsNotStruct),
+        ("testStructWithMeta", testStructWithMeta),
+        ("testSimpleFieldsList", testSimpleFieldsList),
+        ("testSimpleFieldsListWithId", testSimpleFieldsListWithId),
+        ("testFieldsListWithUnion", testFieldsListWithUnion),
+        ("testFieldsListWithUnionAndId", testFieldsListWithUnionAndId),
+        ("testFieldsListWithUnionAndIdWithoutUnionType", testFieldsListWithUnionAndIdWithoutUnionType),
+        ("testFieldsListWithUnionAndIdSortedBySize", testFieldsListWithUnionAndIdSortedBySize),
+        ("testFieldsListWithUnionAndStructAndIdSortedBySize", testFieldsListWithUnionAndStructAndIdSortedBySize),
+    ]
 }

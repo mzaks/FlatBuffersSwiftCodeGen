@@ -628,4 +628,16 @@ fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
         print(result!)
         XCTAssertEqual(expected, result!)
     }
+
+    static var allTests = [
+        ("testSchema", testSchema),
+        ("testIdentLookup", testIdentLookup),
+        ("testHasRecursion1", testHasRecursion1),
+        ("testHasRecursion2", testHasRecursion2),
+        ("testHasRecursion3", testHasRecursion3),
+        ("testHasRecursion4", testHasRecursion4),
+        ("testHasRecursion5", testHasRecursion5),
+        ("testHasRecursion6", testHasRecursion6),
+        ("testGenerate", testGenerate),
+    ]
 }

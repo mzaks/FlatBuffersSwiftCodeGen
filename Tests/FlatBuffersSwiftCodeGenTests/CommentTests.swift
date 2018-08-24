@@ -27,4 +27,9 @@ class CommentTests: XCTestCase {
         XCTAssertNotNil(result)
         XCTAssertEqual(result?.0.value, " this is something")
     }
+
+    static var allTests = [
+        ("testComment", testComment),
+        ("testCommentWithSomeTextOnOtherLine", testCommentWithSomeTextOnOtherLine)
+    ]
 }
