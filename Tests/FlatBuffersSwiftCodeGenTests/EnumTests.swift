@@ -56,4 +56,8 @@ public enum Foo: Int8, FlatBuffersEnum {
 """
         XCTAssertEqual(expected, stringResult)
     }
+
+    static var allTests = [
+        ("testEnum", testEnum),
+    ]
 }

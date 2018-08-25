@@ -105,4 +105,16 @@ foo:int
         let result = Field.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
         XCTAssertNil(result)
     }
+
+    static var allTests = [
+        ("testReadField", testReadField),
+        ("testReadFieldWithMetaData", testReadFieldWithMetaData),
+        ("testReadFieldWithDefault", testReadFieldWithDefault),
+        ("testReadFieldWithDefaultAndMetaData", testReadFieldWithDefaultAndMetaData),
+        ("testReadFieldWithDefaultIdent", testReadFieldWithDefaultIdent),
+        ("testReadBadField0", testReadBadField0),
+        ("testReadBadField1", testReadBadField1),
+        ("testReadBadField2", testReadBadField2),
+        ("testReadBadField3", testReadBadField3),
+    ]
 }

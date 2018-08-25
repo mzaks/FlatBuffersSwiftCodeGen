@@ -68,4 +68,9 @@ hello
         let result = ValueLiteral.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
         XCTAssertNil(result)
     }
+
+    static var allTests = [
+        ("testValues", testValues),
+        ("testNotValue", testNotValue),
+    ]
 }

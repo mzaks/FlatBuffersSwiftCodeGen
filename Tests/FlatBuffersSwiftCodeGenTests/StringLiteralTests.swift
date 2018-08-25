@@ -32,4 +32,10 @@ class StringLiteralTests: XCTestCase {
         let result = StringLiteral.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
         XCTAssertNil(result)
     }
+
+    static var allTests = [
+        ("testReadMultilineString", testReadMultilineString),
+        ("testReadQuotedString", testReadQuotedString),
+        ("testNotClosedString", testNotClosedString),
+    ]
 }

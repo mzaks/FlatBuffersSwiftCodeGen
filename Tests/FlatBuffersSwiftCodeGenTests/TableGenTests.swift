@@ -428,4 +428,14 @@ extension T1 {
         print(t1.swiftClass(lookup: lookup))
         print(t1.fromDataExtenstion(lookup: lookup))
     }
+
+    static var allTests = [
+        ("testProtocolReaderExtension", testProtocolReaderExtension),
+        ("testProtocolReaderExtensionWithExplicitIndex", testProtocolReaderExtensionWithExplicitIndex),
+        ("testSwiftClass", testSwiftClass),
+        ("testFromData", testFromData),
+        ("testInsertExtension", testInsertExtension),
+        ("testInsertMethod", testInsertMethod),
+        ("testGenAll", testGenAll),
+    ]
 }

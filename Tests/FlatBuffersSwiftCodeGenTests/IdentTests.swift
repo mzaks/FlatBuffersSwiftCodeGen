@@ -65,4 +65,12 @@ class IdentTests: XCTestCase {
         let result = Ident.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
         XCTAssertNil(result)
     }
+
+    static var allTests = [
+        ("testReadLowerCaseIdent", testReadLowerCaseIdent),
+        ("testReadCapitalisedIdent", testReadCapitalisedIdent),
+        ("testReadUnderscoredIdent", testReadUnderscoredIdent),
+        ("testReadComplexIdent", testReadComplexIdent),
+        ("testIgnoreIdentStartingWithNumber", testIgnoreIdentStartingWithNumber),
+    ]
 }
