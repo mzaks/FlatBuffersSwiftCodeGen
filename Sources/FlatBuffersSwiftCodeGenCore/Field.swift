@@ -55,8 +55,17 @@ extension Field: ASTNode {
             length -= p6.distance(to: r.1)
             p6 = r.1
         }
+
         guard let p7 = eat(";", from: p6, length: length) else {return nil}
-        return (Field(name: name, type: type, defaultValue: defaultValue, defaultIdent: defaultIdent, metaData: metaData), p7)
+
+        var p8 = p7
+        while let (comment, _p8) = Comment.with(pointer: p8, length: length) {
+            comments.append(comment)
+            length -= p5.distance(to: _p8)
+            p8 = _p8
+        }
+
+        return (Field(name: name, type: type, defaultValue: defaultValue, defaultIdent: defaultIdent, metaData: metaData), p8)
     }
 }
 
