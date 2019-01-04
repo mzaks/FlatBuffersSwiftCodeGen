@@ -12,11 +12,11 @@ extension Table {
     
     public func swift(lookup: IdentLookup, isRoot: Bool = false, fileIdentifier: String = "nil") -> String {
         return """
-        \(swiftClass(lookup:lookup))
-        \(readerProtocolExtension(lookup:lookup))
-        \(fromDataExtenstion(lookup:lookup, isRoot: isRoot))
-        \(insertExtenstion(lookup:lookup))
-        \(insertMethod(lookup:lookup, isRoot: isRoot, fileIdentifier: fileIdentifier))
+        \(swiftClass(lookup:lookup.flattened))
+        \(readerProtocolExtension(lookup:lookup.flattened))
+        \(fromDataExtenstion(lookup:lookup.flattened, isRoot: isRoot))
+        \(insertExtenstion(lookup:lookup.flattened))
+        \(insertMethod(lookup:lookup.flattened, isRoot: isRoot, fileIdentifier: fileIdentifier))
         """
     }
     
@@ -149,7 +149,7 @@ extension Table {
         return """
     extension \(name.value) {
     \(genPub())
-        fileprivate static func from(selfReader: Direct<FlatBuffersMemoryReader>?) -> \(name.value)? {
+         static func from(selfReader: Direct<FlatBuffersMemoryReader>?) -> \(name.value)? {
             guard let selfReader = selfReader else {
                 return nil
             }

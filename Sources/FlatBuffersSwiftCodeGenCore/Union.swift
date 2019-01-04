@@ -138,7 +138,7 @@ extension Union {
         return """
         public enum \(name.value) {
             case \(genCases(cases))
-            fileprivate static func from(selfReader: \(name.value).Direct<FlatBuffersMemoryReader>?) -> \(name.value)? {
+            static func from(selfReader: \(name.value).Direct<FlatBuffersMemoryReader>?) -> \(name.value)? {
                 guard let selfReader = selfReader else {
                     return nil
                 }

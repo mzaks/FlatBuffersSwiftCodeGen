@@ -136,10 +136,15 @@ public struct Schema {
     let structs: [Struct]
     let enums: [Enum]
     let unions: [Union]
+    let children: [Schema]
 }
 
 extension Schema: ASTNode {
     public static func with(pointer: UnsafePointer<UInt8>, length: Int) -> (Schema, UnsafePointer<UInt8>)? {
+        return with(pointer: pointer, length: length, resolveImports: nil)
+    }
+
+    public static func with(pointer: UnsafePointer<UInt8>, length: Int, resolveImports: ((String) -> (Schema?))?) -> (Schema, UnsafePointer<UInt8>)? {
         var includes: [Include] = []
         var namespace: Namespace?
         var rootType: RootType?
@@ -150,6 +155,7 @@ extension Schema: ASTNode {
         var structs: [Struct] = []
         var enums: [Enum] = []
         var unions: [Union] = []
+        var children: [Schema] = []
         
         var p1 = pointer
         var length = length
@@ -157,6 +163,11 @@ extension Schema: ASTNode {
             if let r = Include.with(pointer: p1, length: length) {
                 length -= p1.distance(to: r.1)
                 includes.append(r.0)
+                
+                if let resolveImports = resolveImports, let schema = resolveImports(r.0.path.value) {
+                    children.append(schema)
+                }
+                
                 p1 = r.1
                 continue
             }
@@ -231,22 +242,48 @@ extension Schema: ASTNode {
             tables: tables,
             structs: structs,
             enums: enums,
-            unions: unions
+            unions: unions,
+            children: children
         ), p1)
     }
 }
 
 struct IdentLookup {
     let structs: [String: Struct]
-    let tables: [String:Table]
+    let tables: [String: Table]
     let enums: [String: Enum]
     let unions: [String: Union]
+    let children: [IdentLookup]
+
+    var flattened: IdentLookup {
+        return children.reduce(self) { (identLookup, otherIdentLookup) -> IdentLookup in
+            return identLookup.merging(otherIdentLookup)
+        }
+    }
+
+    var nodes: [ASTNode] {
+        return [tables.values.asAnyASTNode,
+                enums.values.asAnyASTNode,
+                structs.values.asAnyASTNode,
+                unions.values.asAnyASTNode]
+            .joined().map { $0.astNode }
+    }
+}
+
+extension IdentLookup {
+    func merging(_ other: IdentLookup) -> IdentLookup {
+        return IdentLookup(structs: structs.merging(other.structs) { $1 },
+                           tables: tables.merging(other.tables) { $1 },
+                           enums: enums.merging(other.enums) { $1 },
+                           unions: unions.merging(other.unions) { $1 },
+                           children: [])
+    }
 }
 
 extension Schema {
     var identLookup: IdentLookup {
-        var structs = [String:Struct]()
-        var tables = [String:Table]()
+        var structs = [String: Struct]()
+        var tables = [String: Table]()
         var enums = [String: Enum]()
         var unions =  [String: Union]()
         
@@ -263,11 +300,15 @@ extension Schema {
             unions[u.name.value] = u
         }
         
-        return IdentLookup(structs: structs, tables: tables, enums: enums, unions: unions)
+        return IdentLookup(structs: structs,
+                           tables: tables,
+                           enums: enums,
+                           unions: unions,
+                           children: children.map { $0.identLookup })
     }
     
     var hasRecursions: Bool {
-        let lookup = identLookup
+        let lookup = identLookup.flattened
         guard let rootType = rootType?.ident.value,
             let rootTable = lookup.tables[rootType] else {
             return false
@@ -285,8 +326,8 @@ extension Schema {
     }
     
     class Visited {
-        var set: Set<String> = []
-        func insert(_ s: String) {
+        var set: Set<Ident> = []
+        func insert(_ s: Ident) {
             set.insert(s)
         }
     }
@@ -301,18 +342,15 @@ extension Schema {
         result.append("")
         
         var visited = Visited()
-        guard let rootType = rootType?.ident.value,
-            let rootTable = lookup.tables[rootType] else {
-                fatalError("Root type \(self.rootType?.ident.value ?? "nil") is not a table")
-        }
+
         func trace(result: StringBuilder, node: ASTNode, visited: Visited) {
             if let table = node as? Table {
-                guard visited.set.contains(table.name.value) == false else {
+                guard visited.set.contains(table.name) == false else {
                     return
                 }
-                visited.insert(table.name.value)
-                if table.name.value == rootType,
-                    let fileIdentifier = fileIdent?.value.value {
+                visited.insert(table.name)
+                let rootType = self.rootType?.ident.value
+                if table.name.value == rootType, let fileIdentifier = fileIdent?.value.value {
                     result.append(table.swift(lookup: lookup, isRoot: table.name.value == rootType, fileIdentifier: fileIdentifier))
                 } else {
                     result.append(table.swift(lookup: lookup, isRoot: table.name.value == rootType))
@@ -332,16 +370,16 @@ extension Schema {
                     }
                 }
             } else if let e = node as? Enum {
-                guard visited.set.contains(e.name.value) == false else {
+                guard visited.set.contains(e.name) == false else {
                     return
                 }
-                visited.insert(e.name.value)
+                visited.insert(e.name)
                 result.append(e.swift)
             } else if let s = node as? Struct {
-                guard visited.set.contains(s.name.value) == false else {
+                guard visited.set.contains(s.name) == false else {
                     return
                 }
-                visited.insert(s.name.value)
+                visited.insert(s.name)
                 result.append(s.swift)
                 for f in s.fields {
                     if let ref = f.type.ref?.value,
@@ -350,10 +388,10 @@ extension Schema {
                     }
                 }
             } else if let u = node as? Union {
-                guard visited.set.contains(u.name.value) == false else {
+                guard visited.set.contains(u.name) == false else {
                     return
                 }
-                visited.insert(u.name.value)
+                visited.insert(u.name)
                 result.append(u.swift)
                 for u_case in u.cases {
                     if let t = lookup.tables[u_case.value] {
@@ -362,7 +400,16 @@ extension Schema {
                 }
             }
         }
-        trace(result: result, node: rootTable, visited: visited)
+
+        if let rootType = rootType?.ident.value, let rootTable = lookup.tables[rootType] {
+            trace(result: result, node: rootTable, visited: visited)
+        }
+        else {
+            lookup.nodes.forEach { node in
+                trace(result: result, node: node, visited: visited)
+            }
+        }
+
         if self.hasRecursions {
             result.append("""
             fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {

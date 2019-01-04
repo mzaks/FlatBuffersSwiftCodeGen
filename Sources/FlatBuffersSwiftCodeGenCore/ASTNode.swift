@@ -8,6 +8,26 @@
 
 import Foundation
 
+struct AnyASTNode {
+    var astNode: ASTNode
+
+    init(astNode: ASTNode) {
+        self.astNode = astNode
+    }
+}
+
+extension ASTNode {
+    var asAnyASTNode: AnyASTNode {
+        return AnyASTNode(astNode: self)
+    }
+}
+
+extension Sequence where Element: ASTNode {
+    var asAnyASTNode: [AnyASTNode] {
+        return map { $0.asAnyASTNode }
+    }
+}
+
 public protocol ASTNode {
     static func with(pointer: UnsafePointer<UInt8>, length: Int) -> (Self, UnsafePointer<UInt8>)?
 }

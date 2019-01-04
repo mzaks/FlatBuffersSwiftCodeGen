@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Ident {
+struct Ident: Hashable {
     let value: String
 }
 
