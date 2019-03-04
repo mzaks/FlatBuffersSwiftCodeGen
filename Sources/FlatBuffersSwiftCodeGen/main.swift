@@ -53,7 +53,7 @@ if let swiftFileContent = schema?.swift(withImport: !withoutImport) {
 if CommandLine.arguments.count > 3
     && CommandLine.arguments[3] == "download" {
     print("🕐 Downloading FlatBuffersBuilder")
-    let builderData = try Data(contentsOf: URL(string: "https://raw.github.com/mzaks/FlatBuffersSwift/1.0.0/FlatBuffersSwift/FlatBuffersBuilder.swift")!)
+    let builderData = try Data(contentsOf: URL(string: "https://raw.githubusercontent.com/mzaks/FlatBuffersSwift/1.0.0/FlatBuffersSwift/FlatBuffersBuilder.swift")!)
     try!builderData.write(to: swiftUrl.deletingLastPathComponent().appendingPathComponent("FlatBuffersBuilder.swift"))
     print("✅ Completed")
     print("🕐 Downloading FlatBuffersReader")
