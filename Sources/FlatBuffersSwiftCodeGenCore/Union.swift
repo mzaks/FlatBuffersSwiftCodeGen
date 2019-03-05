@@ -97,7 +97,7 @@ extension Union {
             let properties = cases.map { (ident) -> String in
                 let name = ident.value
                 return """
-                    var as\(name): \(name)? {
+                    public var as\(name): \(name)? {
                         switch self {
                         case .with\(name)(let v):
                             return v
@@ -112,7 +112,7 @@ extension Union {
         func genValueProperty(_ cases: [Ident]) -> String {
             let caseStatements = cases.map { "        case .with\($0.value)(let v): return v" }.joined(separator: "\n")
             return """
-                var value: AnyObject {
+                public var value: AnyObject {
                     switch self {
             \(caseStatements)
                     }
@@ -123,7 +123,7 @@ extension Union {
             let properties = cases.map { (ident) -> String in
                 let name = ident.value
                 return """
-                        var as\(name): \(name).Direct<R>? {
+                        public var as\(name): \(name).Direct<R>? {
                             switch self {
                             case .with\(name)(let v):
                                 return v

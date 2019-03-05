@@ -336,7 +336,7 @@ public enum U {
             }
             return nil
         }
-        var asT11: T11.Direct<R>? {
+        public var asT11: T11.Direct<R>? {
             switch self {
             case .withT11(let v):
                 return v
@@ -344,7 +344,7 @@ public enum U {
                 return nil
             }
         }
-        var asT2: T2.Direct<R>? {
+        public var asT2: T2.Direct<R>? {
             switch self {
             case .withT2(let v):
                 return v
@@ -365,7 +365,7 @@ public enum U {
           case .withT2(let o): return try o.insert(builder)
         }
     }
-    var asT11: T11? {
+    public var asT11: T11? {
         switch self {
         case .withT11(let v):
             return v
@@ -373,7 +373,7 @@ public enum U {
             return nil
         }
     }
-    var asT2: T2? {
+    public var asT2: T2? {
         switch self {
         case .withT2(let v):
             return v
@@ -381,7 +381,7 @@ public enum U {
             return nil
         }
     }
-    var value: AnyObject {
+    public var value: AnyObject {
         switch self {
         case .withT11(let v): return v
         case .withT2(let v): return v

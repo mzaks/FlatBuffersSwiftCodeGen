@@ -78,7 +78,7 @@ public enum Foo2 {
             }
             return nil
         }
-        var asA: A.Direct<R>? {
+        public var asA: A.Direct<R>? {
             switch self {
             case .withA(let v):
                 return v
@@ -86,7 +86,7 @@ public enum Foo2 {
                 return nil
             }
         }
-        var asB: B.Direct<R>? {
+        public var asB: B.Direct<R>? {
             switch self {
             case .withB(let v):
                 return v
@@ -107,7 +107,7 @@ public enum Foo2 {
           case .withB(let o): return try o.insert(builder)
         }
     }
-    var asA: A? {
+    public var asA: A? {
         switch self {
         case .withA(let v):
             return v
@@ -115,7 +115,7 @@ public enum Foo2 {
             return nil
         }
     }
-    var asB: B? {
+    public var asB: B? {
         switch self {
         case .withB(let v):
             return v
@@ -123,7 +123,7 @@ public enum Foo2 {
             return nil
         }
     }
-    var value: AnyObject {
+    public var value: AnyObject {
         switch self {
         case .withA(let v): return v
         case .withB(let v): return v
