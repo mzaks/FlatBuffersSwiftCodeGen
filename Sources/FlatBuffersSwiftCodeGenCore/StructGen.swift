@@ -39,4 +39,71 @@ extension Struct {
         }
         """
     }
+
+    func genFromJsonObjectExtension(_ lookup: IdentLookup) -> String {
+        if fields.isEmpty {
+            return ""
+        }
+
+        func genGuardStatement(_ scalar: Type.Scalar, _ name: String) -> String {
+            switch scalar {
+            case .bool:
+                return """
+                guard let \(name) = object["\(name)"] as? Bool else { return nil }
+                """
+            case .f32:
+                return """
+                guard let \(name)Double = object["\(name)"] as? Double, let \(name) = Optional.some(\(scalar.swift)(\(name)Double)) else { return nil }
+                """
+            case .f64:
+                return """
+                guard let \(name) = object["\(name)"] as? Double else { return nil }
+                """
+            case .i16, .i32, .i64, .i8, .u16, .u32, .u64, .u8:
+                return """
+                guard let \(name)Int = object["\(name)"] as? Int, let \(name) = \(scalar.swift)(exactly: \(name)Int) else { return nil }
+                """
+            }
+        }
+
+        func genGuardStatements(_ fields: [Field]) -> String {
+            var statements = [String]()
+            for f in fields {
+                if let scalar = f.type.scalar {
+                    statements.append("       \(genGuardStatement(scalar, f.fieldName))")
+                } else if f.type.isStruct(lookup),
+                    let typeName = f.type.ref?.value {
+                    statements.append("""
+                            guard let \(f.fieldName) = \(typeName).from(jsonObject: object["\(f.fieldName)"] as? [String: Any]) else { return nil }
+                    """)
+                } else if f.type.isEnum(lookup),
+                    let typeName = f.type.ref?.value {
+                    statements.append("""
+                            guard let \(f.fieldName) = \(typeName).from(jsonValue: object["\(f.fieldName)"]) else { return nil }
+                    """)
+                }
+            }
+            return statements.joined(separator: "\n")
+        }
+
+        func genInitParamStatements(_ fields: [Field]) -> String {
+            var statements = [String]()
+            for f in fields {
+                statements.append("            \(f.fieldName): \(f.fieldName)")
+            }
+            return statements.joined(separator: ",\n")
+        }
+
+        return """
+        extension \(name.value) {
+            static func from(jsonObject: [String: Any]?) -> \(name.value)? {
+                guard let object = jsonObject else { return nil }
+        \(genGuardStatements(fields))
+                return \(name.value)(
+        \(genInitParamStatements(fields))
+                )
+            }
+        }
+        """
+    }
 }

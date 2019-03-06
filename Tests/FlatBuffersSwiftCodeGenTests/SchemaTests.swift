@@ -291,6 +291,17 @@ extension T1 {
         return builder.makeData
     }
 }
+extension T1 {
+    public static func from(jsonObject: [String: Any]?) -> T1? {
+        guard let object = jsonObject else { return nil }
+        let u = U.from(type:object["u_type"] as? String, jsonObject: object["u"] as? [String: Any])
+        let s = S1.from(jsonObject: object["s"] as? [String: Any])
+        return T1 (
+            u: u,
+            s: s
+        )
+    }
+}
 public enum U {
     case withT11(T11), withT2(T2)
     fileprivate static func from(selfReader: U.Direct<FlatBuffersMemoryReader>?) -> U? {
@@ -385,6 +396,21 @@ public enum U {
         switch self {
         case .withT11(let v): return v
         case .withT2(let v): return v
+        }
+    }
+}
+extension U {
+    static func from(type: String?, jsonObject: [String: Any]?) -> U? {
+        guard let type = type, let object = jsonObject else { return nil }
+        switch type {
+        case "T11":
+            guard let o = T11.from(jsonObject: object) else { return nil }
+            return U.withT11(o)
+        case "T2":
+            guard let o = T2.from(jsonObject: object) else { return nil }
+            return U.withT2(o)
+        default:
+            return nil
         }
     }
 }
@@ -489,11 +515,35 @@ extension T11 {
     }
 
 }
+extension T11 {
+    public static func from(jsonObject: [String: Any]?) -> T11? {
+        guard let object = jsonObject else { return nil }
+        let i = (object["i"] as? Int).flatMap { Int32(exactly: $0) } ?? 0
+        let s = S1.from(jsonObject: object["s"] as? [String: Any])
+        let e = E2.from(jsonValue: object["e"])
+        return T11 (
+            i: i,
+            s: s,
+            e: e
+        )
+    }
+}
 public struct S1: Scalar {
     public let a: Int32
     public let s: S2
     public static func ==(v1:S1, v2:S1) -> Bool {
         return v1.a==v2.a && v1.s==v2.s
+    }
+}
+extension S1 {
+    static func from(jsonObject: [String: Any]?) -> S1? {
+        guard let object = jsonObject else { return nil }
+       guard let aInt = object["a"] as? Int, let a = Int32(exactly: aInt) else { return nil }
+        guard let s = S2.from(jsonObject: object["s"] as? [String: Any]) else { return nil }
+        return S1(
+            a: a,
+            s: s
+        )
     }
 }
 public struct S2: Scalar {
@@ -503,6 +553,17 @@ public struct S2: Scalar {
         return v1.b==v2.b && v1.e==v2.e
     }
 }
+extension S2 {
+    static func from(jsonObject: [String: Any]?) -> S2? {
+        guard let object = jsonObject else { return nil }
+       guard let b = object["b"] as? Bool else { return nil }
+        guard let e = E2.from(jsonValue: object["e"]) else { return nil }
+        return S2(
+            b: b,
+            e: e
+        )
+    }
+}
 public enum E2: Int8, FlatBuffersEnum {
     case A, B
     public static func fromScalar<T>(_ scalar: T) -> E2? where T : Scalar {
@@ -510,6 +571,23 @@ public enum E2: Int8, FlatBuffersEnum {
             return nil
         }
         return E2(rawValue: value)
+    }
+}
+extension E2 {
+    static func from(jsonValue: Any?) -> E2? {
+        if let string = jsonValue as? String {
+            if string == "A" {
+                return .A
+            }
+            if string == "B" {
+                return .B
+            }
+        }
+        if let int = jsonValue as? Int,
+            let rawValue = Int8(exactly: int) {
+            return E2.init(rawValue: rawValue)
+        }
+        return nil
     }
 }
 public final class T2 {
@@ -610,6 +688,17 @@ extension T2 {
     }
 
 }
+extension T2 {
+    public static func from(jsonObject: [String: Any]?) -> T2? {
+        guard let object = jsonObject else { return nil }
+        let b = object["b"] as? Bool
+        let t = T1.from(jsonObject: object["t"] as? [String: Any])
+        return T2 (
+            b: b,
+            t: t
+        )
+    }
+}
 fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
     for binding in builder.deferedBindings {
         if let offset = builder.cache[ObjectIdentifier(binding.object)] {
@@ -625,7 +714,9 @@ fileprivate func performLateBindings(_ builder : FlatBuffersBuilder) throws {
         
         let schema = Schema.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
         let result = schema?.0.swift()
+        print("-----------------------")
         print(result!)
+        print("-----------------------")
         XCTAssertEqual(expected, result!)
     }
 

@@ -136,8 +136,35 @@ public enum Foo2 {
         XCTAssertEqual(result, expected)
     }
 
+    func testGenFromJson() {
+        let s: StaticString = """
+    union Foo2 (something) {A, B}
+"""
+        let expected = """
+extension Foo2 {
+    static func from(type: String?, jsonObject: [String: Any]?) -> Foo2? {
+        guard let type = type, let object = jsonObject else { return nil }
+        switch type {
+        case "A":
+            guard let o = A.from(jsonObject: object) else { return nil }
+            return Foo2.withA(o)
+        case "B":
+            guard let o = B.from(jsonObject: object) else { return nil }
+            return Foo2.withB(o)
+        default:
+            return nil
+        }
+    }
+}
+"""
+        let result = Union.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)?.0.genFromJsonExtension()
+        print(result!)
+        XCTAssertEqual(result!, expected)
+    }
+
     static var allTests = [
         ("testUnion", testUnion),
         ("testGen", testGen),
+        ("testGenFromJson", testGenFromJson)
     ]
 }

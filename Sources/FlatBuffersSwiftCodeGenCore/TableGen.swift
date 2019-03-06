@@ -17,6 +17,7 @@ extension Table {
         \(fromDataExtenstion(lookup:lookup, isRoot: isRoot))
         \(insertExtenstion(lookup:lookup))
         \(insertMethod(lookup:lookup, isRoot: isRoot, fileIdentifier: fileIdentifier))
+        \(genFromJsonObjectExtension(lookup))
         """
     }
     
@@ -507,5 +508,112 @@ extension Table {
             }
         }
         fatalError("Unexpeceted type")
+    }
+
+    func genFromJsonObjectExtension(_ lookup: IdentLookup) -> String {
+        func genAssignementStatements(_ fields: [Field]) -> String {
+            var statements = [String]()
+            for f in fields {
+                if f.type.string {
+                    if f.type.vector {
+                        statements.append("""
+                                let \(f.fieldName) = object["\(f.fieldName)"] as? [String] ?? []
+                        """)
+                    } else {
+                        statements.append("""
+                                let \(f.fieldName) = object["\(f.fieldName)"] as? String
+                        """)
+                    }
+                } else if f.type.isEnum(lookup), let typeName = f.type.ref?.value {
+                    if f.type.vector {
+                        statements.append("""
+                                let \(f.fieldName) = ((object["\(f.fieldName)"] as? [Any]) ?? []).compactMap { \(typeName).from(jsonValue: $0)}
+                        """)
+                    } else {
+                        statements.append("""
+                                let \(f.fieldName) = \(typeName).from(jsonValue: object["\(f.fieldName)"])
+                        """)
+                    }
+                } else if f.type.isStruct(lookup) || f.type.isTable(lookup), let typeName = f.type.ref?.value {
+                    if f.type.vector {
+                        statements.append("""
+                                let \(f.fieldName) = ((object["\(f.fieldName)"] as? [[String: Any]]) ?? []).compactMap { \(typeName).from(jsonObject: $0)}
+                        """)
+                    } else {
+                        statements.append("""
+                                let \(f.fieldName) = \(typeName).from(jsonObject: object["\(f.fieldName)"] as? [String: Any])
+                        """)
+                    }
+                } else if let scalar = f.type.scalar {
+                    if f.type.vector {
+                        switch scalar {
+                        case .bool:
+                            statements.append("""
+                                    let \(f.fieldName) = object["\(f.fieldName)"] as? [Bool] ?? []
+                            """)
+                        case .f32, .f64:
+                            statements.append("""
+                                    let \(f.fieldName) = (object["\(f.fieldName)"] as? [Double] ?? []).compactMap { \(scalar.swift)(exactly: $0) }
+                            """)
+                        case .i8, .i16, .i32, .i64, .u8, .u16, .u32, .u64:
+                            statements.append("""
+                                    let \(f.fieldName) = (object["\(f.fieldName)"] as? [Int] ?? []).compactMap { \(scalar.swift)(exactly: $0) }
+                            """)
+                        }
+                    } else {
+                        switch scalar {
+                        case .bool:
+                            statements.append("""
+                                    let \(f.fieldName) = object["\(f.fieldName)"] as? Bool
+                            """)
+                        case .f32:
+                            statements.append("""
+                                    let \(f.fieldName) = object["\(f.fieldName)"] as? Double).flatMap { \(scalar.swift)($0) } ?? \(f.defaultValue?.value ?? "0")
+                            """)
+                        case .f64:
+                            statements.append("""
+                                    let \(f.fieldName) = object["\(f.fieldName)"] as? Double
+                            """)
+                        case .i8, .i16, .i32, .i64, .u8, .u16, .u32, .u64:
+                            statements.append("""
+                                    let \(f.fieldName) = (object["\(f.fieldName)"] as? Int).flatMap { \(scalar.swift)(exactly: $0) } ?? \(f.defaultValue?.value ?? "0")
+                            """)
+                        }
+                    }
+                } else if f.type.isUnion(lookup), let typeName = f.type.ref?.value {
+                    if f.type.vector {
+                        fatalError("Unsupported type")
+                    } else {
+                        statements.append("""
+                                let \(f.fieldName) = \(typeName).from(type:object["\(f.fieldName)_type"] as? String, jsonObject: object["\(f.fieldName)"] as? [String: Any])
+                        """)
+                    }
+                } else {
+                    fatalError("Unsupported type")
+                }
+
+            }
+            return statements.joined(separator: "\n")
+        }
+
+        func genInitParamStatements(_ fields: [Field]) -> String {
+            var statements = [String]()
+            for f in fields {
+                statements.append("            \(f.fieldName): \(f.fieldName)")
+            }
+            return statements.joined(separator: ",\n")
+        }
+
+        return """
+extension \(name.value) {
+    public static func from(jsonObject: [String: Any]?) -> \(name.value)? {
+        guard let object = jsonObject else { return nil }
+\(genAssignementStatements(fields))
+        return \(name.value) (
+\(genInitParamStatements(fields))
+        )
+    }
+}
+"""
     }
 }

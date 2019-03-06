@@ -412,6 +412,49 @@ extension T1 {
         let result = table?.insertMethod(lookup: lookup!, fileIdentifier: "nil")
         XCTAssertEqual(expected, result!)
     }
+
+    func testGenFromJsonObjectExtension() {
+        let expected = """
+extension T1 {
+    public static func from(jsonObject: [String: Any]?) -> T1? {
+        guard let object = jsonObject else { return nil }
+        let i = (object["i"] as? Int).flatMap { Int32(exactly: $0) } ?? 0
+        let b = object["b"] as? Bool
+        let __d = object["__d"] as? Double
+        let bs = object["bs"] as? [Bool] ?? []
+        let name = object["name"] as? String
+        let names = object["names"] as? [String] ?? []
+        let _self = T0.from(jsonObject: object["_self"] as? [String: Any])
+        let selfs = ((object["selfs"] as? [[String: Any]]) ?? []).compactMap { T0.from(jsonObject: $0)}
+        let s = S1.from(jsonObject: object["s"] as? [String: Any])
+        let s_s = ((object["s_s"] as? [[String: Any]]) ?? []).compactMap { S1.from(jsonObject: $0)}
+        let e = E.from(jsonValue: object["e"])
+        let es = ((object["es"] as? [Any]) ?? []).compactMap { E.from(jsonValue: $0)}
+        let u = U1.from(type:object["u_type"] as? String, jsonObject: object["u"] as? [String: Any])
+        return T1 (
+            i: i,
+            b: b,
+            __d: __d,
+            bs: bs,
+            name: name,
+            names: names,
+            _self: _self,
+            selfs: selfs,
+            s: s,
+            s_s: s_s,
+            e: e,
+            es: es,
+            u: u
+        )
+    }
+}
+"""
+        let schema = Schema.with(pointer:s.utf8Start, length: s.utf8CodeUnitCount)?.0
+        let lookup = schema?.identLookup
+        let table = lookup?.tables["T1"]
+        let result = table?.genFromJsonObjectExtension(lookup!)
+        XCTAssertEqual(expected, result!)
+    }
     
     func testGenAll() {
         let schema = Schema.with(pointer:s.utf8Start, length: s.utf8CodeUnitCount)?.0
@@ -437,5 +480,6 @@ extension T1 {
         ("testInsertExtension", testInsertExtension),
         ("testInsertMethod", testInsertMethod),
         ("testGenAll", testGenAll),
+        ("testGenFromJsonObjectExtension", testGenFromJsonObjectExtension)
     ]
 }

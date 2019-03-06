@@ -337,12 +337,14 @@ extension Schema {
                 }
                 visited.insert(e.name.value)
                 result.append(e.swift)
+                result.append(e.genFromJsonValue())
             } else if let s = node as? Struct {
                 guard visited.set.contains(s.name.value) == false else {
                     return
                 }
                 visited.insert(s.name.value)
                 result.append(s.swift)
+                result.append(s.genFromJsonObjectExtension(lookup))
                 for f in s.fields {
                     if let ref = f.type.ref?.value,
                         let _s = lookup.structs[ref] {
@@ -355,6 +357,7 @@ extension Schema {
                 }
                 visited.insert(u.name.value)
                 result.append(u.swift)
+                result.append(u.genFromJsonExtension())
                 for u_case in u.cases {
                     if let t = lookup.tables[u_case.value] {
                         trace(result: result, node: t, visited: visited)

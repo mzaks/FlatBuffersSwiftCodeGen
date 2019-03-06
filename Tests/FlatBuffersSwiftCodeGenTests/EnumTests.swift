@@ -57,7 +57,44 @@ public enum Foo: Int8, FlatBuffersEnum {
         XCTAssertEqual(expected, stringResult)
     }
 
+    func testEnumFromJsonValueExtension() {
+        let s: StaticString = """
+    enum Foo : byte {
+        bar1, bar2 = 3, bar3
+    }
+"""
+        let result = Enum.with(pointer: s.utf8Start, length: s.utf8CodeUnitCount)
+        let stringResult = result?.0.genFromJsonValue()
+        let expected = """
+extension Foo {
+    static func from(jsonValue: Any?) -> Foo? {
+        if let string = jsonValue as? String {
+            if string == "bar1" {
+                return .bar1
+            }
+            if string == "bar2" {
+                return .bar2
+            }
+            if string == "bar3" {
+                return .bar3
+            }
+        }
+        if let int = jsonValue as? Int,
+            let rawValue = Int8(exactly: int) {
+            return Foo.init(rawValue: rawValue)
+        }
+        return nil
+    }
+}
+"""
+        print(stringResult!)
+        XCTAssertEqual(expected, stringResult!)
+
+    }
+
     static var allTests = [
         ("testEnum", testEnum),
+        ("testEnumToSwift", testEnumToSwift),
+        ("testEnumFromJsonValueExtension", testEnumFromJsonValueExtension)
     ]
 }

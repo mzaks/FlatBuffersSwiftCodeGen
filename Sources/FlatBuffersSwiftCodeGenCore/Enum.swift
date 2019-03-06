@@ -111,4 +111,33 @@ public enum \(self.name.value): \(type.swift), FlatBuffersEnum {
 }
 """
     }
+
+    func genFromJsonValue() -> String {
+        func genCases(_ cases: [EnumCase]) -> String {
+            var statements = [String]()
+            for c in cases {
+                statements.append("""
+                            if string == "\(c.ident.value)" {
+                                return .\(c.ident.value)
+                            }
+                """)
+            }
+
+            return statements.joined(separator: "\n")
+        }
+        return """
+extension \(name.value) {
+    static func from(jsonValue: Any?) -> \(name.value)? {
+        if let string = jsonValue as? String {
+\(genCases(cases))
+        }
+        if let int = jsonValue as? Int,
+            let rawValue = \(type.scalar?.swift ?? "Int8")(exactly: int) {
+            return \(name.value).init(rawValue: rawValue)
+        }
+        return nil
+    }
+}
+"""
+    }
 }

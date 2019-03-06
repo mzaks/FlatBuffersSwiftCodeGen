@@ -180,4 +180,32 @@ extension Union {
         }
         """
     }
+
+    func genFromJsonExtension() -> String {
+
+        func genSwitchCases(_ casses: [Ident]) -> String {
+            var statements = [String]()
+            for c in casses {
+                statements.append("""
+        case "\(c.value)":
+            guard let o = \(c.value).from(jsonObject: object) else { return nil }
+            return \(name.value).with\(c.value)(o)
+""")
+            }
+            return statements.joined(separator: "\n")
+        }
+
+        return """
+extension \(name.value) {
+    static func from(type: String?, jsonObject: [String: Any]?) -> \(name.value)? {
+        guard let type = type, let object = jsonObject else { return nil }
+        switch type {
+\(genSwitchCases(cases))
+        default:
+            return nil
+        }
+    }
+}
+"""
+    }
 }
