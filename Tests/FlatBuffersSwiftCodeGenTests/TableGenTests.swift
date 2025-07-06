@@ -55,8 +55,10 @@ extension T1.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : T1.Direct<T>, t2 : T1.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : T1.Direct<T>, t2 : T1.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var i: Int32 {
@@ -75,7 +77,7 @@ extension T1.Direct {
 
         return FlatBuffersScalarVector(reader: _reader, myOffset: _reader.offset(objectOffset: _myOffset, propertyIndex:3))
     }
-    public var name: UnsafeBufferPointer<UInt8>? {
+    public var name: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:4) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
@@ -145,8 +147,10 @@ extension T1.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : T1.Direct<T>, t2 : T1.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : T1.Direct<T>, t2 : T1.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var b: Bool {
@@ -419,8 +423,8 @@ extension T1 {
     public static func from(jsonObject: [String: Any]?) -> T1? {
         guard let object = jsonObject else { return nil }
         let i = (object["i"] as? Int).flatMap { Int32(exactly: $0) } ?? 0
-        let b = object["b"] as? Bool
-        let __d = object["__d"] as? Double
+        let b = object["b"] as? Bool ?? false
+        let __d = object["__d"] as? Double ?? 0.0
         let bs = object["bs"] as? [Bool] ?? []
         let name = object["name"] as? String
         let names = object["names"] as? [String] ?? []

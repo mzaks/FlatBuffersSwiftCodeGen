@@ -53,8 +53,10 @@ extension Table {
                     }
                 }
             }
-            public var hashValue: Int { return Int(_myOffset) }
-            public static func ==<T>(t1 : \(name.value).Direct<T>, t2 : \(name.value).Direct<T>) -> Bool {
+            public func hash(into hasher: inout Hasher) {
+                hasher.combine(_myOffset)
+            }
+            public static func ==(t1 : \(name.value).Direct<T>, t2 : \(name.value).Direct<T>) -> Bool {
                 return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
             }
         \(computedFields.map{return gen($0)}.joined(separator: "\n"))
@@ -417,7 +419,7 @@ extension Table {
             if type.vector {
                 return "FlatBuffersStringVector<T>"
             }
-            return "UnsafeBufferPointer<UInt8>?"
+            return "Data?"
         }
         if let ref = type.ref {
             let t = Type(scalar: nil, vector: false, ref: ref, string: false)
@@ -564,7 +566,7 @@ extension Table {
                         switch scalar {
                         case .bool:
                             statements.append("""
-                                    let \(f.fieldName) = object["\(f.fieldName)"] as? Bool
+                                    let \(f.fieldName) = object["\(f.fieldName)"] as? Bool ?? \(f.defaultValue?.value ?? "false")
                             """)
                         case .f32:
                             statements.append("""
@@ -572,7 +574,7 @@ extension Table {
                             """)
                         case .f64:
                             statements.append("""
-                                    let \(f.fieldName) = object["\(f.fieldName)"] as? Double
+                                    let \(f.fieldName) = object["\(f.fieldName)"] as? Double ?? \(f.defaultValue?.value ?? "0.0")
                             """)
                         case .i8, .i16, .i32, .i64, .u8, .u16, .u32, .u64:
                             statements.append("""

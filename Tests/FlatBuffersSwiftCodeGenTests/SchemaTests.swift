@@ -206,8 +206,10 @@ extension T1.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : T1.Direct<T>, t2 : T1.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : T1.Direct<T>, t2 : T1.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var u: U.Direct<T>? {
@@ -444,8 +446,10 @@ extension T11.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : T11.Direct<T>, t2 : T11.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : T11.Direct<T>, t2 : T11.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var i: Int32 {
@@ -618,8 +622,10 @@ extension T2.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : T2.Direct<T>, t2 : T2.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : T2.Direct<T>, t2 : T2.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var b: Bool {
@@ -691,7 +697,7 @@ extension T2 {
 extension T2 {
     public static func from(jsonObject: [String: Any]?) -> T2? {
         guard let object = jsonObject else { return nil }
-        let b = object["b"] as? Bool
+        let b = object["b"] as? Bool ?? false
         let t = T1.from(jsonObject: object["t"] as? [String: Any])
         return T2 (
             b: b,

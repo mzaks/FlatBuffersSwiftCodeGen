@@ -293,14 +293,14 @@ extension Schema {
     
     public func swift(withImport: Bool = true) ->  String {
         let lookup = identLookup
-        var result = StringBuilder()
+        let result = StringBuilder()
         result.append("import Foundation")
         if (withImport){
             result.append("import FlatBuffersSwift")
         }
         result.append("")
         
-        var visited = Visited()
+        let visited = Visited()
         guard let rootType = rootType?.ident.value,
             let rootTable = lookup.tables[rootType] else {
                 fatalError("Root type \(self.rootType?.ident.value ?? "nil") is not a table")
